@@ -91,8 +91,10 @@ module TemplateConfigurator
           output_fh.write new_output
         elsif !@options[:template][:output_file].nil?
           TemplateConfigurator.log.debug("writing new configuation (#{new_output.length} bytes)")
-          output_fh.truncate(0)
+          output_fh.rewind
           output_fh.write(new_output)
+          output_fh.flush
+          output_fh.truncate(output_fh.pos)
           output_fh.flush
           reload()
         else
