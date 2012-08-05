@@ -1,16 +1,28 @@
+#
+# Template Configurator - A utility to generate configuration files from ERB templates and restart
+# services when configuration changes.
+#
+# Copyright (C) 2012 Erik Osterman <e@osterman.com>
+# 
+# This file is part of Template Configurator.
+# 
+# Template Configurator is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# Template Configurator is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with Template Configurator.  If not, see <http://www.gnu.org/licenses/>.
+#
 require 'optparse'
+require 'logger'
 
 module TemplateConfigurator
-  @@logger = nil
-  
-  def self.log=(logger)
-    @@logger=logger
-  end
-
-  def self.log
-    @@logger
-  end
-
   class CommandLine
     def initialize
       @logger = Logger.new STDERR
@@ -34,6 +46,11 @@ module TemplateConfigurator
         @options[:service][:name] = nil
         opts.on("--service:name INITRC", "initrc used to control service (default: #{@options[:service][:name]})") do |initrc|
           @options[:service][:name] = initrc
+        end
+
+        @options[:service][:status] = 'status'
+        opts.on("--service:status ACTION", "action to execute to get status of service (default: #{@options[:service][:status]})") do |action|
+          @options[:service][:status] = action
         end
 
         @options[:service][:reload] = 'reload'
@@ -86,11 +103,6 @@ module TemplateConfigurator
           @options[:template][:json_file] = file
         end
 
-        @options[:template][:commit] = true
-        opts.on("--template:[no-]commit", "Commit changes") do |commit|
-          @options[:template][:commit] = commit
-        end
-
         #
         # Logging
         #
@@ -119,6 +131,12 @@ module TemplateConfigurator
         #
         # General options
         #
+
+        @options[:dry_run] = false
+        opts.on("--dry-run", "Dry run (do not commit changes to disk)") do 
+          @options[:dry_run] = true
+        end
+
 
         opts.on( '-V', '--version', 'Display version information' ) do
           puts "Template Configurator #{TemplateConfigurator::VERSION}"
@@ -158,7 +176,7 @@ module TemplateConfigurator
         @processor.render
       rescue Interrupt => e
         TemplateConfigurator.log.info("Aborting")
-      rescue NameError => e
+      rescue NameError, ArgumentError => e
         TemplateConfigurator.log.fatal(e.message)
         TemplateConfigurator.log.debug(e.backtrace.join("\n"))
         exit(1)
