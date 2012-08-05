@@ -86,7 +86,10 @@ module TemplateConfigurator
       else
         TemplateConfigurator.log.info "SHA1 checksum changed"
         # Write the new configuration
-        if @options[:dry_run] && !@options[:template][:output_file].nil?
+        if @options[:dry_run]
+          TemplateConfigurator.log.debug("Not attemptig service reload due to dry-run")
+          output_fh.write new_output
+        elsif !@options[:template][:output_file].nil?
           TemplateConfigurator.log.debug("writing new configuation (#{new_output.length} bytes)")
           output_fh.truncate(0)
           output_fh.write(new_output)

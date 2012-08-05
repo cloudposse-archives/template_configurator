@@ -24,9 +24,10 @@ Or install it yourself as:
 
 ## Usage
 
-    Usage: template_configurator
+    Usage: bin/template_configurator
             --service:command EXECUTABLE action to execute to command service (default: /sbin/service)
             --service:name INITRC        initrc used to control service (default: )
+            --service:status ACTION      action to execute to get status of service (default: status)
             --service:reload ACTION      action to execute to reload service (default: reload)
             --service:restart ACTION     action to execute to restart service (default: restart)
             --service:start ACTION       action to execute to start service (default: start)
@@ -36,11 +37,11 @@ Or install it yourself as:
             --template:input-file FILE   Where to read ERB template
             --template:output-file FILE  Where to write the output of the template
             --template:json-file FILE    Base port to initialize haproxy listening for mysql clusters
-            --template:[no-]commit       Commit changes
             --log:level LEVEL            Logging level
             --log:file FILE              Write logs to FILE (default: STDERR)
             --log:age DAYS               Rotate logs after DAYS pass (default: 7)
             --log:size SIZE              Rotate logs after the grow past SIZE bytes
+            --dry-run                    Dry run (do not commit changes to disk)
         -V, --version                    Display version information
         -h, --help                       Display this screen
 
